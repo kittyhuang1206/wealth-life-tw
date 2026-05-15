@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>財富人生 — 台灣年輕人理財派對遊戲</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c10;--s1:#12151d;--s2:#191d28;--s3:#1f2435;--border:#252c40;
+  --gold:#f5c842;--green:#2ecc71;--red:#e74c3c;--blue:#3498db;
+  --text:#eef0f7;--muted:#5a6480;
+  --p0:#f5c842;--p1:#3b82f6;--p2:#ef4444;--p3:#10b981;
+  --p0b:rgba(245,200,66,.15);--p1b:rgba(59,130,246,.15);--p2b:rgba(239,68,68,.15);--p3b:rgba(16,185,129,.15);
+  --p0r:rgba(245,200,66,.45);--p1r:rgba(59,130,246,.45);--p2r:rgba(239,68,68,.45);--p3r:rgba(16,185,129,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;min-height:100vh;overflow-x:hidden;}
+body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'Noto Sans TC',sans-serif;font-weight:700;border:none;cursor:pointer;transition:all .15s;border-radius:12px;}
+.btn-gold{background:var(--gold);color:#0a0c10;font-size:15px;padding:13px 30px;}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(245,200,66,.3);}
+.btn-ghost{background:transparent;color:var(--text);font-size:13px;padding:11px 22px;border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--muted);}
+
+/* ── LOBBY ── */
+#lobby{background:radial-gradient(ellipse at 20% 10%,#1a2040 0%,var(--bg) 55%),radial-gradient(ellipse at 80% 90%,#1a1030 0%,transparent 50%);align-items:center;justify-content:flex-start;padding:32px 24px;position:relative;overflow-y:auto;min-height:100vh;}
+#lobby::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,#252c40 1px,transparent 1px);background-size:48px 48px;opacity:.2;pointer-events:none;}
+.lobby-inner{position:relative;z-index:1;text-align:center;max-width:640px;width:100%;margin:auto;}
+.lb-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.25);color:var(--gold);font-size:10px;letter-spacing:2px;padding:5px 16px;border-radius:20px;margin-bottom:20px;font-family:'Space Mono',monospace;}
+.badge-symbol{font-size:9px;line-height:1;color:var(--gold);filter:drop-shadow(0 0 8px rgba(245,200,66,.35));}
+.lb-title{font-size:clamp(48px,11vw,88px);font-weight:900;line-height:.92;letter-spacing:-3px;margin-bottom:10px;}
+.lb-title em{font-style:normal;color:var(--gold);}
+.lb-sub{font-size:clamp(13px,2vw,16px);color:var(--muted);margin-bottom:32px;line-height:1.6;}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px;}
+.mode-card{background:var(--s1);border:2px solid var(--border);border-radius:16px;padding:18px 16px;cursor:pointer;text-align:left;transition:all .2s;position:relative;}
+.mode-card:hover{border-color:var(--gold);transform:translateY(-2px);}
+.mode-card.sel{border-color:var(--gold);background:rgba(245,200,66,.05);}
+.mode-hot{position:absolute;top:10px;right:10px;background:rgba(245,200,66,.12);color:var(--gold);font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px;font-family:'Space Mono',monospace;}
+.mode-icon{margin-bottom:10px;}
+.symbol-mark{font-family:'Space Mono',monospace;color:var(--gold);text-shadow:0 0 18px rgba(245,200,66,.35);font-weight:700;}
+.mode-card .symbol-mark{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,rgba(245,200,66,.14),rgba(245,200,66,.04));border:1px solid rgba(245,200,66,.22);display:flex;align-items:center;justify-content:center;margin-bottom:10px;box-shadow:0 12px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.06);}
+.mode-card .symbol-mark svg{width:29px;height:29px;stroke:var(--gold);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 8px rgba(245,200,66,.28));}
+.mode-card.sel .symbol-mark{background:linear-gradient(135deg,rgba(245,200,66,.22),rgba(245,200,66,.07));border-color:rgba(245,200,66,.42);}
+.mode-name{font-size:14px;font-weight:900;margin-bottom:3px;}
+.mode-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+.setup-box{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:16px;text-align:left;}
+.setup-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:12px;}
+.prow{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.prow:last-child{margin-bottom:0;}
+.pdot{width:13px;height:13px;border-radius:50%;flex-shrink:0;}
+.pinput{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Noto Sans TC',sans-serif;font-size:13px;outline:none;transition:border-color .2s;}
+.pinput:focus{border-color:var(--gold);}
+.pinput::placeholder{color:var(--muted);}
+.pinput:disabled{opacity:.35;}
+.ptog{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;background:var(--s3);border:1px solid var(--border);color:var(--muted);transition:all .2s;flex-shrink:0;user-select:none;}
+.ptog.on{background:rgba(245,200,66,.1);border-color:var(--gold);color:var(--gold);}
+.lobby-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+
+
+/* ── TURN OVERLAY ── */
+#turn-ov{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;}
+#turn-ov.show{display:flex;animation:fadeIn .2s;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.turn-blur{position:absolute;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);}
+.turn-box{position:relative;z-index:1;border-radius:24px;border:3px solid;max-width:400px;width:calc(100% - 32px);padding:40px 28px;text-align:center;animation:popIn .3s cubic-bezier(.34,1.56,.64,1);}
+@keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.turn-emoji{font-size:52px;margin-bottom:10px;animation:bob 1.2s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.turn-label{font-size:11px;font-weight:700;letter-spacing:2px;font-family:'Space Mono',monospace;opacity:.55;margin-bottom:5px;}
+.turn-pname{font-size:38px;font-weight:900;line-height:1.1;margin-bottom:6px;}
+.turn-desc{font-size:13px;opacity:.6;line-height:1.5;margin-bottom:6px;}
+.turn-history{font-size:11px;opacity:.45;margin-bottom:24px;line-height:1.5;}
+.turn-btn{padding:13px 36px;border-radius:13px;font-size:15px;font-weight:900;border:none;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .15s;}
+.turn-btn:hover{transform:translateY(-2px);}
+
+
+/* ── HOME BUTTON + LIFE UI ── */
+.home-pill{
+  height:34px;padding:0 14px;border-radius:999px;border:1px solid rgba(245,200,66,.35);
+  background:linear-gradient(135deg,rgba(245,200,66,.18),rgba(245,200,66,.05));
+  color:var(--gold);font-family:'Noto Sans TC',sans-serif;font-weight:900;font-size:12px;
+  display:inline-flex;align-items:center;gap:7px;cursor:pointer;box-shadow:0 0 18px rgba(245,200,66,.08);
+  transition:transform .15s, box-shadow .15s, border-color .15s;flex-shrink:0;
+}
+.home-pill:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(245,200,66,.18);border-color:var(--gold);}
+.home-pill .home-ico{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(245,200,66,.16);border:1px solid rgba(245,200,66,.26);font-family:'Space Mono',monospace;font-size:13px;line-height:1;}
+.music-symbol{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--gold);}
+.life-stage{
+  background:linear-gradient(135deg,rgba(52,152,219,.12),rgba(155,89,182,.10));
+  border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:12px 15px;
+  display:flex;align-items:center;gap:12px;justify-content:space-between;box-shadow:0 10px 28px rgba(0,0,0,.16);
+}
+.stage-left{display:flex;align-items:center;gap:10px;min-width:0;}
+.stage-emoji{width:38px;height:38px;border-radius:13px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid rgba(245,200,66,.18);}
+.stage-kicker{font-size:9px;letter-spacing:1.5px;color:var(--muted);font-family:'Space Mono',monospace;font-weight:700;}
+.stage-title{font-size:15px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.stage-note{font-size:11px;color:#8b96b3;margin-top:2px;line-height:1.4;}
+.stage-progress{min-width:110px;height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;}
+.stage-progress span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#ff8bd1);border-radius:999px;transition:width .25s;}
+.vibe-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+.vibe-pill{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);border-radius:9px;padding:6px 7px;}
+.vibe-lbl{font-size:9px;color:rgba(255,255,255,.42);}
+.vibe-val{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;margin-top:1px;}
+@media(max-width:520px){.home-pill span:last-child{display:none}.life-stage{align-items:flex-start;flex-direction:column}.stage-progress{width:100%;}}
+
+/* ── TOP BAR ── */
+.top-bar{background:var(--s1);border-bottom:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.tb-icon-btn{width:30px;height:30px;border-radius:7px;background:var(--s2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;transition:all .15s;flex-shrink:0;}
+.tb-icon-btn:hover{border-color:var(--muted);}
+.tb-icon-btn.on{background:rgba(245,200,66,.1);border-color:rgba(245,200,66,.3);}
+.tb-logo{font-size:13px;font-weight:900;color:var(--gold);}
+.tb-sep{width:1px;height:20px;background:var(--border);}
+.tb-qnum{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);}
+.tb-qnum b{color:var(--text);}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.timer-wrap{position:relative;width:36px;height:36px;}
+.timer-wrap svg{transform:rotate(-90deg);}
+.timer-wrap circle{fill:none;stroke-width:3;}
+.tr-track{stroke:var(--border);}
+.tr-fill{stroke:var(--gold);stroke-linecap:round;transition:stroke-dashoffset .09s linear;}
+.timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;}
+
+/* ── SCORE STRIP ── */
+.score-strip{background:var(--s1);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;}
+.score-inner{display:flex;}
+.sc-pl{padding:7px 12px;border-right:1px solid var(--border);display:flex;align-items:center;gap:7px;flex:1;min-width:0;}
+.sc-pl:last-child{border-right:none;}
+.sc-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;border:2px solid transparent;}
+.sc-info{flex:1;min-width:0;}
+.sc-name{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sc-nums{font-size:9px;font-family:'Space Mono',monospace;color:var(--muted);white-space:nowrap;}
+.sc-tick{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .3s;}
+.sc-tick.done{background:var(--green);box-shadow:0 0 5px var(--green);}
+
+/* ── GAME MAIN ── */
+.game-main{flex:1;overflow-y:auto;padding:14px;}
+.game-center{max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:13px;}
+
+/* ── CPB ── */
+.cpb{border-radius:13px;padding:11px 16px;display:flex;align-items:center;gap:11px;border:2px solid;}
+.cpb-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;flex-shrink:0;}
+.cpb-label{font-size:9px;letter-spacing:1.5px;font-family:'Space Mono',monospace;opacity:.55;font-weight:700;}
+.cpb-name{font-size:19px;font-weight:900;margin-top:1px;}
+.cpb-action{font-size:11px;opacity:.55;margin-top:1px;}
+.cpb-right{margin-left:auto;text-align:right;}
+.cpb-prog{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);}
+
+/* ── EVENT CARD ── */
+.ev-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.ev-head{padding:16px 18px 0;}
+.ev-tag-row{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.ev-tag{display:inline-flex;align-items:center;font-size:10px;font-weight:700;letter-spacing:1.2px;padding:3px 10px;border-radius:20px;font-family:'Space Mono',monospace;}
+.ev-qlab{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;}
+.ev-title{font-size:19px;font-weight:900;line-height:1.35;margin-bottom:7px;}
+.ev-desc{font-size:13px;color:#7080a0;line-height:1.75;margin-bottom:10px;}
+.ev-tip{background:rgba(245,200,66,.06);border-left:3px solid rgba(245,200,66,.35);padding:8px 14px;margin:0 18px 14px;border-radius:0 8px 8px 0;font-size:12px;color:#c8b86a;line-height:1.6;}
+.ev-tip strong{color:var(--gold);}
+.choices-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:0 14px 14px;}
+@media(max-width:500px){.choices-grid{grid-template-columns:1fr;}}
+.cc{background:var(--s2);border:2px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;position:relative;text-align:left;transition:all .18s;overflow:hidden;}
+.cc:hover:not(.locked){border-color:var(--gold);background:rgba(245,200,66,.04);transform:translateY(-2px);}
+.cc.locked{cursor:not-allowed;opacity:.4;}
+.cc-letter{width:22px;height:22px;border-radius:6px;background:var(--s3);font-size:10px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;margin-bottom:7px;font-family:'Space Mono',monospace;color:var(--muted);}
+.cc-title{font-size:13px;font-weight:700;line-height:1.4;margin-bottom:3px;}
+.cc-hint{font-size:11px;color:var(--muted);line-height:1.4;}
+.cc-markers{position:absolute;bottom:7px;right:7px;display:flex;gap:3px;}
+.c-dot{width:9px;height:9px;border-radius:50%;}
+
+/* ── REVEAL ── */
+.reveal-sec{display:none;flex-direction:column;gap:13px;}
+.reveal-sec.show{display:flex;}
+.rev-hd{text-align:center;}
+.rev-emo{font-size:40px;margin-bottom:5px;}
+.rev-title{font-size:17px;font-weight:900;}
+.rev-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+.outcomes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;}
+.oc{border-radius:13px;padding:14px;border:2px solid;}
+.oc-hd{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+.oc-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;}
+.oc-pname{font-size:12px;font-weight:700;}
+.oc-choice{font-size:10px;opacity:.5;margin-top:1px;}
+.oc-emo{font-size:20px;margin-bottom:4px;}
+.oc-rtitle{font-size:12px;font-weight:700;margin-bottom:3px;}
+.oc-rdesc{font-size:11px;opacity:.6;line-height:1.5;margin-bottom:7px;}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:7px;}
+.chip{font-size:10px;padding:2px 7px;border-radius:20px;font-family:'Space Mono',monospace;font-weight:700;}
+.chip-pos{background:rgba(46,204,113,.1);color:#2ecc71;border:1px solid rgba(46,204,113,.2);}
+.chip-neg{background:rgba(231,76,60,.1);color:#e74c3c;border:1px solid rgba(231,76,60,.2);}
+.chip-neu{background:rgba(52,152,219,.1);color:#3498db;border:1px solid rgba(52,152,219,.2);}
+.oc-money{border-top:1px solid rgba(255,255,255,.07);padding-top:7px;margin-top:3px;}
+.oc-mrow{display:flex;justify-content:space-between;font-size:10px;margin-bottom:3px;}
+.oc-mlbl{color:rgba(255,255,255,.3);}
+.oc-mval{font-family:'Space Mono',monospace;font-weight:700;}
+.lesson-card{background:rgba(155,89,182,.07);border:1px solid rgba(155,89,182,.2);border-radius:13px;padding:14px 16px;}
+.lesson-lbl{font-size:9px;letter-spacing:2px;color:#9b59b6;font-family:'Space Mono',monospace;font-weight:700;margin-bottom:7px;}
+.lesson-txt{font-size:12px;color:#c4b5fd;line-height:1.75;}
+.lesson-txt strong{color:#d8b4fe;}
+.continue-row{display:flex;justify-content:center;}
+
+/* ── LEADERBOARD ── */
+#leaderboard{background:var(--bg);align-items:center;justify-content:center;padding:24px;overflow-y:auto;}
+.lb-wrap{max-width:600px;width:100%;padding-bottom:32px;}
+.lb-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.lb-h{font-size:24px;font-weight:900;}
+.podium{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:0;align-items:end;margin-bottom:18px;}
+.pod-spot{display:flex;flex-direction:column;align-items:center;gap:5px;}
+.pod-block{width:100%;border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;}
+.pod-name{font-size:11px;font-weight:700;text-align:center;}
+.pod-val{font-size:10px;color:var(--muted);font-family:'Space Mono',monospace;}
+.rank-list{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;}
+.rank-row{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:11px 14px;display:flex;align-items:center;gap:11px;}
+.rank-n{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;width:24px;color:var(--muted);}
+.rank-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;}
+.rank-info{flex:1;}
+.rank-name{font-size:13px;font-weight:700;}
+.rank-sub{font-size:10px;color:var(--muted);margin-top:1px;}
+.rank-nums{display:flex;gap:10px;}
+.rni{text-align:right;}
+.rni-val{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;}
+.rni-lbl{font-size:9px;color:var(--muted);margin-top:1px;}
+.lessons-box{background:var(--s1);border:1px solid var(--border);border-radius:13px;padding:16px;margin-bottom:18px;}
+.lessons-ttl{font-size:9px;letter-spacing:2px;color:var(--gold);font-family:'Space Mono',monospace;font-weight:700;margin-bottom:10px;}
+.l-li{display:flex;gap:7px;margin-bottom:7px;font-size:11px;color:#7080a0;line-height:1.6;}
+.l-li span:first-child{color:var(--green);flex-shrink:0;}
+.lb-btns{display:flex;justify-content:center;gap:10px;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.su{animation:slideUp .3s ease;}
+
+/* ── KAHOOT-STYLE FINAL RESULT ── */
+.final-hero{
+  background:linear-gradient(135deg,rgba(245,200,66,.14),rgba(52,152,219,.08),rgba(155,89,182,.10));
+  border:1px solid rgba(245,200,66,.25);
+  border-radius:22px;
+  padding:20px;
+  margin-bottom:18px;
+  box-shadow:0 16px 45px rgba(0,0,0,.22);
+}
+.final-eyebrow{
+  font-family:'Space Mono',monospace;
+  color:var(--gold);
+  font-size:10px;
+  letter-spacing:2px;
+  font-weight:700;
+  margin-bottom:6px;
+}
+.final-title{
+  font-size:28px;
+  font-weight:900;
+  line-height:1.15;
+}
+.final-sub{
+  color:#94a3b8;
+  font-size:12px;
+  line-height:1.7;
+  margin-top:6px;
+}
+.bar-board{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+  margin-bottom:18px;
+}
+.bar-board-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:16px;
+}
+.bar-board-title h3{
+  font-size:16px;
+  font-weight:900;
+}
+.bar-board-title span{
+  font-family:'Space Mono',monospace;
+  font-size:10px;
+  color:var(--muted);
+}
+.bar-list{
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+}
+.bar-row{
+  display:grid;
+  grid-template-columns:88px 1fr 86px;
+  gap:10px;
+  align-items:center;
+}
+.bar-name{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-width:0;
+}
+.bar-medal{
+  width:24px;
+  height:24px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  font-size:11px;
+  background:var(--s3);
+  color:var(--gold);
+  border:1px solid var(--border);
+  flex-shrink:0;
+}
+.bar-player{
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.bar-track{
+  position:relative;
+  height:34px;
+  background:var(--s2);
+  border:1px solid var(--border);
+  border-radius:999px;
+  overflow:hidden;
+}
+.bar-fill{
+  height:100%;
+  border-radius:999px;
+  width:0%;
+  min-width:8px;
+  transition:width .9s cubic-bezier(.2,.9,.2,1);
+  box-shadow:0 0 22px rgba(245,200,66,.18);
+}
+.bar-score{
+  text-align:right;
+  font-family:'Space Mono',monospace;
+  font-size:12px;
+  font-weight:900;
+  color:var(--text);
+}
+.bar-detail{
+  font-size:9px;
+  color:var(--muted);
+  margin-top:2px;
+}
+.life-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-top:8px;
+}
+.life-pill{
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;
+  padding:8px;
+  text-align:center;
+}
+.life-pill b{
+  display:block;
+  font-family:'Space Mono',monospace;
+  font-size:12px;
+  margin-bottom:2px;
+}
+.life-pill span{
+  color:var(--muted);
+  font-size:9px;
+}
+.lessons-box.pretty{
+  border-radius:18px;
+  padding:18px;
+  background:linear-gradient(180deg,rgba(18,21,29,.98),rgba(25,29,40,.98));
+}
+.lesson-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:10px;
+}
+.lesson-mini{
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  padding:13px;
+  min-height:112px;
+}
+.lesson-mini-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:8px;
+}
+.lesson-num{
+  width:24px;
+  height:24px;
+  border-radius:8px;
+  background:rgba(245,200,66,.12);
+  color:var(--gold);
+  border:1px solid rgba(245,200,66,.22);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Space Mono',monospace;
+  font-size:10px;
+  font-weight:900;
+}
+.lesson-kind{
+  font-size:9px;
+  color:#94a3b8;
+  font-family:'Space Mono',monospace;
+}
+.lesson-mini h4{
+  font-size:12px;
+  font-weight:900;
+  margin-bottom:6px;
+  line-height:1.45;
+}
+.lesson-mini p{
+  color:#8fa0bd;
+  font-size:11px;
+  line-height:1.65;
+}
+@media(max-width:560px){
+  .bar-row{grid-template-columns:1fr;gap:6px;}
+  .bar-score{text-align:left;}
+  .life-stats{grid-template-columns:1fr;}
+}
+
+</style>
+</head>
+<body>
+
+<!-- TURN OVERLAY -->
+<div id="turn-ov">
+  <div class="turn-blur"></div>
+  <div class="turn-box" id="turn-box">
+    <div class="turn-emoji" id="turn-emoji">👇</div>
+    <div class="turn-label">換你了！</div>
+    <div class="turn-pname" id="turn-pname"></div>
+    <div class="turn-desc" id="turn-desc">請做出你的選擇</div>
+    <div class="turn-history" id="turn-history"></div>
+    <button class="turn-btn" id="turn-btn" onclick="dismissTurnOv()">我準備好了！</button>
+  </div>
+</div>
+
+<!-- ══ LOBBY ══ -->
+<div class="screen active" id="lobby">
+  <div class="lobby-inner">
+    <div class="lb-badge"><span class="badge-symbol">◆</span> 台灣年輕人理財派對遊戲</div>
+    <h1 class="lb-title">財富<em>人生</em></h1>
+    <p class="lb-sub">相同起跑點，不同的決定<br>看看誰能在薪水 壓力 快樂之間活下來</p>
+    <div class="mode-grid">
+      <div class="mode-card sel" onclick="selMode('fresh')" id="mode-fresh">
+        <div class="mode-hot">熱門</div>
+        <div class="mode-icon symbol-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32">
+            <path d="M3.5 12.5 16 6l12.5 6.5L16 19 3.5 12.5Z"/>
+            <path d="M8.5 15.5v6c2.3 2.2 12.7 2.2 15 0v-6"/>
+            <path d="M27 13.3v7.2"/>
+            <path d="M27 20.5c-1.2 1.1-1.9 2.2-2.1 3.5h4.2c-.2-1.3-.9-2.4-2.1-3.5Z"/>
+          </svg>
+        </div>
+        <div class="mode-name">社會新鮮人組</div>
+        <div class="mode-desc">月薪28k開局，不只比誰有錢，也比誰不被生活壓垮。</div>
+      </div>
+      <div class="mode-card" onclick="selMode('couple')" id="mode-couple">
+        <div class="mode-icon symbol-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32">
+            <path d="M5.5 14.2 16 5.8l10.5 8.4"/>
+            <path d="M8 13.5v12h16v-12"/>
+            <path d="M13.2 25.5v-5.2c0-1.6 1.2-2.8 2.8-2.8s2.8 1.2 2.8 2.8v5.2"/>
+            <circle cx="12" cy="15" r="1.8"/>
+            <circle cx="20" cy="15" r="1.8"/>
+            <path d="M9.5 20.5c.7-1.3 1.5-2 2.5-2s1.8.7 2.5 2"/>
+            <path d="M17.5 20.5c.7-1.3 1.5-2 2.5-2s1.8.7 2.5 2"/>
+          </svg>
+        </div>
+        <div class="mode-name">雙薪家庭組</div>
+        <div class="mode-desc">雙薪、有小孩、房租/房貸壓力，看看誰能兼顧家庭與財務。</div>
+      </div>
+    </div>
+    <div class="setup-box">
+      <div class="setup-lbl">PLAYERS — 設定玩家（2–4人）</div>
+      <div id="player-rows"></div>
+    </div>
+    <div class="lobby-btns">
+      <button class="btn btn-gold" onclick="doStart()">開始遊戲 →</button>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:14px;">遊玩方式：大家圍著同一個螢幕，每人輪流選擇，其他人請勿偷看 👀</p>
+  </div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div class="screen" id="game">
+  <div class="top-bar">
+    <button class="home-pill" onclick="goHome()" title="回主大廳"><span class="home-ico">⌂</span><span>主大廳</span></button>
+    <div class="tb-logo">財富人生</div>
+    <div class="tb-sep"></div>
+    <div class="tb-qnum">第 <b id="tb-q">1</b> 題 / <b id="tb-tot">10</b></div>
+    <div class="tb-right">
+      <div class="tb-icon-btn music-symbol" id="music-btn-game" onclick="toggleMusic()" title="音樂">♪</div>
+      <div class="timer-wrap">
+        <svg width="36" height="36" viewBox="0 0 36 36">
+          <circle class="tr-track" cx="18" cy="18" r="15"/>
+          <circle class="tr-fill" id="tr-fill" cx="18" cy="18" r="15" stroke-dasharray="94.2" stroke-dashoffset="0"/>
+        </svg>
+        <div class="timer-num" id="timer-num">30</div>
+      </div>
+    </div>
+  </div>
+  <div class="score-strip"><div class="score-inner" id="score-inner"></div></div>
+  <div class="game-main">
+    <div class="game-center">
+      <!-- Life stage banner -->
+      <div class="life-stage" id="life-stage">
+        <div class="stage-left">
+          <div class="stage-emoji symbol-mark" id="stage-emoji">◇</div>
+          <div>
+            <div class="stage-kicker" id="stage-kicker">AGE 22</div>
+            <div class="stage-title" id="stage-title">剛畢業，薪水第一次進帳</div>
+            <div class="stage-note" id="stage-note">這不是答題，是你的財富人生開始了。</div>
+          </div>
+        </div>
+        <div class="stage-progress"><span id="stage-bar" style="width:0%"></span></div>
+      </div>
+      <!-- Current player banner -->
+      <div class="cpb" id="cpb">
+        <div class="cpb-av" id="cpb-av"></div>
+        <div>
+          <div class="cpb-label">現在輪到</div>
+          <div class="cpb-name" id="cpb-name"></div>
+          <div class="cpb-action">做出你的選擇</div>
+        </div>
+        <div class="cpb-right">
+          <div class="cpb-prog" id="cpb-prog"></div>
+        </div>
+      </div>
+      <!-- Event -->
+      <div class="ev-card" id="ev-card">
+        <div class="ev-head">
+          <div class="ev-tag-row">
+            <div class="ev-tag" id="ev-tag"></div>
+            <div class="ev-qlab" id="ev-qlab"></div>
+          </div>
+          <div class="ev-title" id="ev-title"></div>
+          <div class="ev-desc" id="ev-desc"></div>
+        </div>
+        <div class="ev-tip" id="ev-tip" style="display:none;"></div>
+        <div class="choices-grid" id="choices-grid"></div>
+      </div>
+      <!-- Reveal -->
+      <div class="reveal-sec" id="reveal-sec">
+        <div class="rev-hd su">
+          <div class="rev-emo" id="rev-emo"></div>
+          <div class="rev-title" id="rev-title"></div>
+          <div class="rev-sub" id="rev-sub"></div>
+        </div>
+        <div class="outcomes-grid su" id="outcomes-grid"></div>
+        <div class="lesson-card su" id="lesson-card" style="display:none;">
+          <div class="lesson-lbl">📚 這題的理財觀念</div>
+          <div class="lesson-txt" id="lesson-txt"></div>
+        </div>
+        <div class="continue-row su">
+          <button class="btn btn-gold" id="btn-next" onclick="nextRound()">下一題 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LEADERBOARD ══ -->
+<div class="screen" id="leaderboard">
+  <div class="lb-wrap">
+    <div class="lb-top">
+      <div class="lb-h">最終結果</div>
+      <button class="btn btn-ghost" onclick="confirmHome()">⌂ 主大廳</button>
+    </div>
+
+    <div class="final-hero">
+      <div class="final-eyebrow">FINAL ROUND</div>
+      <div class="final-title">誰在薪水、壓力、快樂之間活下來？</div>
+      <div class="final-sub">總分不是只有錢，也包含你的生活品質。看誰真的把人生玩穩。</div>
+    </div>
+
+    <div class="bar-board">
+      <div class="bar-board-title">
+        <h3>玩家總分 Bar Graph</h3>
+        <span>像 Kahoot 一樣看差距</span>
+      </div>
+      <div class="bar-list" id="bar-list"></div>
+    </div>
+
+    <div class="rank-list" id="rank-list"></div>
+
+    <div class="lessons-box pretty">
+      <div class="lessons-ttl">重點整理</div>
+      <div class="lesson-grid" id="lb-lessons"></div>
+    </div>
+
+    <div class="lb-btns"><button class="btn btn-gold" onclick="confirmHome()">回主大廳</button></div>
+  </div>
+</div>
+    <div class="lb-btns"><button class="btn btn-gold" onclick="goHome()">再玩一次 ↻</button></div>
+  </div>
+</div>
+
+<script>
+// ── CONSTANTS ──
+const PC=['var(--p0)','var(--p1)','var(--p2)','var(--p3)'];
+const PB=['var(--p0b)','var(--p1b)','var(--p2b)','var(--p3b)'];
+const PR=['var(--p0r)','var(--p1r)','var(--p2r)','var(--p3r)'];
+const PD=['玩家一','玩家二','玩家三','玩家四'];
+const LT=['A','B','C'];
+const TS={
+  opportunity:'background:rgba(46,204,113,.1);color:#2ecc71;border:1px solid rgba(46,204,113,.2)',
+  risk:'background:rgba(231,76,60,.1);color:#e74c3c;border:1px solid rgba(231,76,60,.2)',
+  learning:'background:rgba(52,152,219,.1);color:#3498db;border:1px solid rgba(52,152,219,.2)',
+  life:'background:rgba(245,200,66,.1);color:#f5c842;border:1px solid rgba(245,200,66,.2)',
+};
+const TL={opportunity:'💼 職涯機會',risk:'⚡ 突發狀況',learning:'📘 理財觀念',life:'⭐ 人生大事'};
+const MODES={
+  fresh:{name:'社會新鮮人',symbol:'graduate',cash:50000,income:28000,expense:22000,assets:0},
+  couple:{name:'雙薪家庭',symbol:'family',cash:200000,income:65000,expense:52000,assets:100000},
+};
+
+// ── EVENTS ──
+const EVENTS=[
+  {type:'opportunity',title:'第一份工作開口要薪水',
+   desc:'HR給你一個制式的薪資數字，你的朋友說這個職缺通常有談判空間。你要怎麼回應？',
+   tip:'<strong>理財時刻：</strong>薪資談判是最被低估的理財行為。多談到的錢，每個月都在幫你累積！',
+   choices:[
+    {text:'直接接受，不想搞砸機會',hint:'穩穩的，先上車再說',
+     result:{emoji:'😐',title:'接受了',desc:'你安全入職，但薪水卡在最低起點。HR其實預期你談判的。',
+       chips:[{l:'未談判',t:'neg'},{l:'薪資偏低',t:'neg'}],eff:{income_delta:0},
+       lesson:'薪資談判成功率超過7成，但多數人選擇沉默。沉默的代價，40年複利下超過百萬元。'}},
+    {text:'說「我研究過市場行情，想討論」',hint:'有準備，有底氣',
+     result:{emoji:'🎉',title:'加薪談成！',desc:'HR稍微遲疑後接受了。有準備的談判通常有效，公司也不想失去好人才。',
+       chips:[{l:'月收增加！',t:'pos'},{l:'談判成功',t:'pos'}],eff:{income_delta:2000},
+       lesson:'用「市場數據」談判比「我需要更多錢」有效5倍。展現你了解市場，不是只想要更多。'}},
+    {text:'開高價，強硬要求大幅加薪',hint:'要就要最多',
+     result:{emoji:'😬',title:'談崩了...',desc:'HR覺得態度太強硬，撤回了offer。談判要有技巧，展現價值而非強迫。',
+       chips:[{l:'失去機會',t:'neg'},{l:'重新求職',t:'neg'}],eff:{cash:-30000},
+       lesson:'談判技巧：說「我能為公司帶來X，所以希望薪資是Y」比純粹要價更有說服力。'}},
+   ],
+   lesson:'薪資談判：用市場數據說話。每月多1,000元，40年複利差距超過百萬。永遠在有準備的時候談，不要衝動。'},
+
+  {type:'learning',title:'每個月發薪日，你怎麼存錢？',
+   desc:'存到錢才是真的存錢。問題是，你用的方法對嗎？薪水進帳後，你的第一個動作是什麼？',
+   tip:'<strong>理財時刻：</strong>「先花後存」是存不到錢的最大原因。改變一個順序，改變一生的財富。',
+   choices:[
+    {text:'月底看剩多少，有剩才存',hint:'先花再存，常見但有盲點',
+     result:{emoji:'😅',title:'不知不覺剩不多',desc:'外食、手搖飲、衝動購物後，月底所剩無幾。先花後存是儲蓄最大的敵人。',
+       chips:[{l:'存款偏少',t:'neg'},{l:'習慣不佳',t:'neg'}],eff:{cash:2000},
+       lesson:'心理研究：人類傾向用掉帳戶裡看得到的錢。讓儲蓄先「消失」，才有辦法存下來。'}},
+    {text:'薪水進來立刻轉走20%，剩的才花',hint:'強迫儲蓄，讓系統幫你',
+     result:{emoji:'✅',title:'每月自動存下去！',desc:'帳戶裡看不到這筆錢，自然不會花。一年後存款讓你自己嚇一跳。',
+       chips:[{l:'儲蓄習慣建立',t:'pos'},{l:'存款增加',t:'pos'}],eff:{cash:5600},
+       lesson:'自動化儲蓄是最有效的存錢方法。設定薪轉帳後自動扣款，不靠意志力，靠系統。'}},
+    {text:'記帳3個月，先搞清楚錢去哪',hint:'了解問題再解決問題',
+     result:{emoji:'📊',title:'記帳讓真相浮現！',desc:'記帳後你發現：外食6k、手搖2k、網購3k。看到數字才有辦法改。',
+       chips:[{l:'支出透明化',t:'pos'},{l:'省下意外支出',t:'pos'}],eff:{cash:3000,expense_delta:-2000},
+       lesson:'50/30/20法則：50%必要支出、30%想要的東西、20%儲蓄與投資。記帳是實踐的第一步。'}},
+   ],
+   lesson:'先存後花：發薪日當天，先把要儲蓄的金額轉走，剩下的才是可花費預算。一個動作，改變財富軌跡。'},
+
+  {type:'risk',title:'手機突然壞了，急需維修費',
+   desc:'螢幕碎裂，必須修。這是一個測試你財務底線的時刻——你有備用金嗎？還是要用其他方式？',
+   tip:'<strong>理財時刻：</strong>緊急備用金應準備3-6個月生活費。沒有它，任何小意外都可能讓你陷入借貸。',
+   choices:[
+    {text:'刷信用卡，這個月先這樣',hint:'方便，但有隱藏成本',
+     result:{emoji:'💳',title:'刷了，但利息開始跑',desc:'你只繳最低應繳，15%循環利率讓你越滾越多。10,000的維修實際花了更多。',
+       chips:[{l:'利息損失',t:'neg'},{l:'月支出增加',t:'neg'}],eff:{cash:-12500,expense_delta:500},
+       lesson:'信用卡循環利率約15-16%，只繳最低應繳是台灣最貴的借錢方式。一定要月月全額繳清！'}},
+    {text:'動用緊急備用金支付',hint:'這就是它的用途',
+     result:{emoji:'🛡️',title:'備用金發揮作用！',desc:'你從緊急備用金取出，完全沒有壓力、沒有利息。記得之後補回去。',
+       chips:[{l:'零利息',t:'pos'},{l:'財務穩定',t:'pos'}],eff:{cash:-10000},
+       lesson:'緊急備用金：放在高利率活存帳戶，專款專用，不碰不投資。讓自己面對意外時不需要向人開口。'}},
+    {text:'找家人先借，下個月還',hint:'暫時度過，但關係借貸',
+     result:{emoji:'😓',title:'開口借錢了',desc:'雖然家人幫了你，但這個情況本可以自己解決。有緊急備用金才有尊嚴與彈性。',
+       chips:[{l:'暫時解決',t:'neu'},{l:'欠人情',t:'neg'}],eff:{cash:-10000},
+       lesson:'緊急備用金不只是錢，是讓你在面對意外時不需要依賴別人的能力與尊嚴。'}},
+   ],
+   lesson:'緊急備用金 = 3-6個月生活費，放活存帳戶，不碰不投資。有了它，小意外不會變成財務危機。'},
+
+  {type:'opportunity',title:'存了第一桶金，要怎麼讓它成長？',
+   desc:'你努力存到了一筆錢，放在活存裡利率超低。朋友說要投資，但有很多選項，你怎麼選？',
+   tip:'<strong>理財時刻：</strong>存款利率跑不過通膨。長期不投資，是另一種形式的財富流失。',
+   choices:[
+    {text:'繼續放活存，安全最重要',hint:'零風險但有隱形損失',
+     result:{emoji:'📉',title:'「安全」其實在縮水',desc:'活存利率0.8%低於通膨1.5%，你的購買力每年在悄悄減少。',
+       chips:[{l:'名目不變',t:'neu'},{l:'購買力縮水',t:'neg'}],eff:{},
+       lesson:'通膨是無形的稅。台灣通膨平均1.5-2%，活存利率0.8%，真實報酬率是負的。'}},
+    {text:'定期定額買台灣50 ETF（0050）',hint:'分散、長期、不猜市場',
+     result:{emoji:'🌱',title:'複利的旅程開始！',desc:'0050追蹤台灣最大50家公司，長期年化報酬約8-10%。定期定額不需要猜高低點。',
+       chips:[{l:'投資習慣建立',t:'pos'},{l:'長期複利啟動',t:'pos'}],eff:{assets_delta:5000,expense_delta:-5000},
+       lesson:'定期定額（平均成本法）：不管市場漲跌，每月固定投入。跌了買更多，長期勝率高。'}},
+    {text:'朋友推薦的飆股，下重注',hint:'高風險一次決勝負',
+     result:{emoji:'😱',title:'飆股暴跌40%！',desc:'那支股票因為財報不佳暴跌，集中押注單一個股風險極高。',
+       chips:[{l:'虧損40%',t:'neg'},{l:'慘痛教訓',t:'neu'}],eff:{assets_delta:-40000},
+       lesson:'分散投資：ETF把風險分散到整個市場，不會因為單一公司出問題就大幅虧損。'}},
+   ],
+   lesson:'ETF定期定額：不需要選股、不需要猜市場時機，歷史長期年化報酬約8-10%，是入門投資最佳起點。'},
+
+  {type:'risk',title:'LINE投資群組：「老師保證月賺10%」',
+   desc:'一個同事邀你進付費投資群組，說老師選股每月保證10%報酬，費用每月3000元。你怎麼看？',
+   tip:'<strong>理財時刻：</strong>合法投資沒有「保證報酬」。「月賺10%」等於年化120%，全世界沒有合法工具做得到。',
+   choices:[
+    {text:'加入！月賺10%太吸引人了',hint:'貪婪是最危險的驅動力',
+     result:{emoji:'🚨',title:'詐騙！資金消失',desc:'老師讓你先小賺，讓你加碼，最後群組消失，損失慘重。這是台灣最常見的投資詐騙手法。',
+       chips:[{l:'被詐騙',t:'neg'},{l:'重大損失',t:'neg'}],eff:{cash:-50000},
+       lesson:'辨識詐騙3大警訊：①保證獲利②月報酬超過3%③催促快速決定。遇到立刻查金管會執照。'}},
+    {text:'直覺不對，直接拒絕',hint:'理性質疑比衝動更有價值',
+     result:{emoji:'🛡️',title:'識破詐騙！',desc:'你記住了「月10%=年120%」不可能合法。成功避開陷阱，省下了可能的損失。',
+       chips:[{l:'避開損失',t:'pos'},{l:'風險意識↑',t:'pos'}],eff:{},
+       lesson:'如果他知道這麼好賺，為什麼需要你的錢？合法投資顧問必須向金管會登記。'}},
+    {text:'先查詢金管會是否有登記',hint:'謹慎查核，才是理智',
+     result:{emoji:'🔍',title:'查到根本沒登記！',desc:'上金管會公開資訊觀測站，這個「老師」完全沒有投顧執照。查驗是最聰明的動作。',
+       chips:[{l:'成功識破',t:'pos'},{l:'學會查核',t:'pos'}],eff:{},
+       lesson:'投資前必做：查詢金管會公開資訊觀測站，確認是否合法登記。這個步驟只要5分鐘。'}},
+   ],
+   lesson:'投資詐騙識別：「保證獲利」「月報酬超高」「快速決定」是三大警訊。任何投資前先查金管會執照！'},
+
+  {type:'opportunity',title:'跳槽機會：薪水多30%',
+   desc:'獵頭邀你面試競爭對手，通過的話薪水多30%。但現公司正在考慮幫你升職，要你再等半年。',
+   tip:'<strong>理財時刻：</strong>研究顯示跳槽加薪15-30%，留任調薪只有3-5%。職場前期是薪資成長最快的黃金期。',
+   choices:[
+    {text:'等待升職，比較忠誠穩定',hint:'安全感，但薪資成長慢',
+     result:{emoji:'⏳',title:'等到了，加薪5%',desc:'半年後升職，加薪少量。而跳槽可以多很多。兩者差距在複利下越拉越大。',
+       chips:[{l:'小幅加薪',t:'neu'},{l:'錯失更大機會',t:'neg'}],eff:{income_delta:1500},
+       lesson:'一般調薪3-5%，跳槽加薪15-30%。職場前10年是薪資成長黃金期，要積極把握機會。'}},
+    {text:'接受新offer，直接跳槽',hint:'把握市場給的機會',
+     result:{emoji:'🚀',title:'薪資跳升30%！',desc:'月薪大幅提升，每月多出來的錢持續投入投資，財富成長顯著加速。',
+       chips:[{l:'月收大幅提升',t:'pos'},{l:'職涯加速',t:'pos'}],eff:{income_delta:9000},
+       lesson:'月薪多出X元，堅持每月投資，30年後差距可能是數百萬。勇於追求薪資成長！'}},
+    {text:'拿新offer去跟現公司談判',hint:'把握籌碼，聰明談判',
+     result:{emoji:'💪',title:'現公司加薪留住你！',desc:'外部offer是最強的談判籌碼。現公司不想失去你，給出更好的條件。',
+       chips:[{l:'月收提升',t:'pos'},{l:'不用換工作',t:'pos'}],eff:{income_delta:5000},
+       lesson:'外部offer談判術：讓市場為你的薪資定價，不需要靠資歷或年資苦等。'}},
+   ],
+   lesson:'薪資是最重要的理財決策之一。職場前10年積極跳槽或談判，每月多出的收入複利增長效果驚人。'},
+
+  {type:'risk',title:'股市大跌20%！你的投資縮水了',
+   desc:'全球股市因某事件暴跌20%，你的投資明顯縮水。群組裡大家都在恐慌，你怎麼做？',
+   tip:'<strong>理財時刻：</strong>巴菲特說：「別人恐懼時我貪婪」。市場下跌對長期投資者是打折促銷，不是災難。',
+   choices:[
+    {text:'跟著賣出，先保住現金',hint:'恐懼驅動的直覺反應',
+     result:{emoji:'😱',title:'賣在低點！鎖死損失',desc:'你賣出時鎖定了虧損。6個月後市場回升，你卻錯過了整個反彈。',
+       chips:[{l:'虧損已實現',t:'neg'},{l:'錯過反彈',t:'neg'}],eff:{assets_delta:-50000,cash:40000},
+       lesson:'研究顯示：錯過最好的10個交易日，長期報酬可能減少一半以上。恐慌賣出是最貴的決定。'}},
+    {text:'不動如山，繼續定期定額',hint:'長期投資者的心法',
+     result:{emoji:'🧘',title:'靜待回升，全身而退',desc:'你沒有因為波動改變計劃，繼續每月買入。12個月後資產甚至超過跌前水位。',
+       chips:[{l:'理性應對',t:'pos'},{l:'長期不受影響',t:'pos'}],eff:{assets_delta:5000},
+       lesson:'股市從未有「永遠沒回來」的下跌（前提是分散投資）。時間是長期投資者最好的朋友。'}},
+    {text:'加碼買入，跌了是打折！',hint:'逆勢思維需要準備',
+     result:{emoji:'🎯',title:'逆勢加碼，大獲全勝！',desc:'你在低點多買了一些，平均成本降低。市場回升後這批加碼的報酬特別高。',
+       chips:[{l:'低點加碼獲利',t:'pos'},{l:'逆向思維',t:'pos'}],eff:{assets_delta:70000,cash:-50000},
+       lesson:'逆勢加碼前提：①有緊急備用金②不是借錢投資③資金短期不需動用。否則可能反效果。'}},
+   ],
+   lesson:'長期投資最大敵人是恐懼與貪婪。市場波動時維持紀律，不亂動才是高手。設好策略，讓時間幫你賺錢。'},
+
+  {type:'risk',title:'保險業務來了：「儲蓄險投資穩賺」',
+   desc:'高中同學當了保險業務員，推薦你買6年期儲蓄險，每年繳大筆保費，到期領回報酬約2.5%。',
+   tip:'<strong>理財時刻：</strong>保險的目的是「轉嫁風險」，不是「存錢賺利息」。搞混了，兩件事都做不好。',
+   choices:[
+    {text:'買！朋友推薦，有保障又有儲蓄',hint:'情感因素影響理財決策',
+     result:{emoji:'😔',title:'保費壓力太大',desc:'大筆保費讓流動性大減。2.5%報酬遠低於ETF歷史8-10%，且6年內不能動用。',
+       chips:[{l:'資金被鎖6年',t:'neg'},{l:'報酬率低',t:'neg'}],eff:{cash:-100000,expense_delta:-100000},
+       lesson:'儲蓄險的隱形成本：資金被鎖住6年，機會成本超高。10萬放ETF vs 儲蓄險，20年後差距驚人。'}},
+    {text:'拒絕，研究正確保險需求再說',hint:'先搞懂再買，才不後悔',
+     result:{emoji:'📚',title:'了解保險本質！',desc:'研究後發現：年輕人最需要的是便宜的定期壽險+實支實付醫療險，費用低保障高。',
+       chips:[{l:'學到保險觀念',t:'pos'},{l:'省下冤枉保費',t:'pos'}],eff:{},
+       lesson:'保險買保障，投資求報酬，兩者分開才是正確觀念。不要讓「朋友情誼」影響理財決策。'}},
+    {text:'買定期壽險+醫療險，不買儲蓄險',hint:'用對工具，保障到位',
+     result:{emoji:'🛡️',title:'正確的保障規劃！',desc:'少量保費買到完整保障：壽險、實支實付醫療、意外險。省下的錢可以投資。',
+       chips:[{l:'低保費高保障',t:'pos'},{l:'多餘資金可投資',t:'pos'}],eff:{expense_delta:-3000},
+       lesson:'保險三大必要：①醫療意外（自己出事不成負擔）②壽險（家人依賴）③失能（長期收入保障）。'}},
+   ],
+   lesson:'保險 ≠ 投資：定期壽險+實支實付醫療險，保費低保障高。儲蓄險費用高報酬低，不是投資工具。'},
+
+  {type:'learning',title:'複利震撼：你能猜到結果嗎？',
+   desc:'25歲開始每月投資5,000元，年報酬7%，到65歲退休。40年後你猜有多少錢？純粹憑直覺猜猜看。',
+   tip:'<strong>理財時刻：</strong>複利被愛因斯坦稱為「世界第八大奇蹟」。何時開始投資，比投多少更關鍵。',
+   choices:[
+    {text:'大概300-500萬？',hint:'直覺上合理的估計',
+     result:{emoji:'😲',title:'答案是1,326萬！',desc:'本金240萬（5000×12×40），加上7%複利，最終是1,326萬。複利讓本金膨脹了5.5倍！',
+       chips:[{l:'了解複利威力',t:'pos'}],eff:{},
+       lesson:'如果35歲才開始，同樣投資，只有646萬。晚10年就少了680萬！越早開始，差距越驚人。'}},
+    {text:'大概600-900萬？',hint:'有複利概念但低估了',
+     result:{emoji:'😮',title:'1,326萬！超過預估',desc:'你已比大多數人更有複利概念，但實際數字還是超乎想像。複利後期爆發力驚人。',
+       chips:[{l:'複利概念增強',t:'pos'}],eff:{},
+       lesson:'複利的「後半段爆發」：前20年增長慢，後20年因為基數大，增長速度加速。堅持最重要。'}},
+    {text:'超過1,000萬！',hint:'你已經懂複利了',
+     result:{emoji:'🎉',title:'猜對了！1,326萬',desc:'你理解複利的威力！現在開始投資就是送給未來自己的禮物。',
+       chips:[{l:'複利概念正確',t:'pos'},{l:'複利獎勵',t:'pos'}],eff:{assets_delta:20000},
+       lesson:'25歲→1,326萬 vs 30歲→924萬 vs 35歲→646萬。每晚5年開始就少約350萬。'}},
+   ],
+   lesson:'複利公式：每月5,000元，40年，7%年報酬 → 1,326萬。本金只有240萬，時間讓它變成5.5倍！越早開始越好。'},
+
+  {type:'life',title:'勞退自提：多存一點退休金？',
+   desc:'HR通知你可以「勞退自提6%」，薪水的6%會多提撥進你的退休帳戶，還可以抵稅，但當月薪水少一些。',
+   tip:'<strong>理財時刻：</strong>勞退自提不只是強迫儲蓄，還有節稅效果。實際成本只有名目的70-80%。',
+   choices:[
+    {text:'不要，薪水已經夠少了',hint:'短視，但心情可以理解',
+     result:{emoji:'😮',title:'30年後退休金嚴重不足',desc:'台灣勞保+勞退平均替代率約60%，退休後收入大幅下降。不自提讓退休缺口更大。',
+       chips:[{l:'退休準備不足',t:'neg'},{l:'短期多一點現金',t:'neu'}],eff:{},
+       lesson:'台灣退休三大危機：勞保破產風險、勞退金額不夠、人口老化壓力。個人要早點準備！'}},
+    {text:'自提6%，退休帳戶開始累積',hint:'現在少一點，未來多很多',
+     result:{emoji:'🎯',title:'聰明的退休規劃！',desc:'自提加上可抵稅，實際成本比表面上低很多。30年後退休金可多出百萬以上。',
+       chips:[{l:'退休金持續增加',t:'pos'},{l:'節稅效果',t:'pos'}],eff:{assets_delta:2400,expense_delta:-2400},
+       lesson:'勞退自提3優點：①抵稅（實際成本低）②政府保本保息③長期複利效果驚人。'}},
+    {text:'自提6% + 另外投資ETF雙軌進行',hint:'最積極的退休準備',
+     result:{emoji:'🚀',title:'雙軌退休策略！',desc:'勞退自提加上個人ETF投資，兩條腿走路。到退休時，資產有機會達到千萬以上。',
+       chips:[{l:'完整退休規劃',t:'pos'},{l:'財富自由可期',t:'pos'}],eff:{assets_delta:5000,expense_delta:-5000},
+       lesson:'退休三支柱：①勞保（政府）②勞退（雇主+自提）③個人投資。三個都做才是完整保障！'}},
+   ],
+   lesson:'退休要靠三支柱：勞保+勞退+個人投資。越早開始自提和投資，複利讓退休金差距越來越大。'},
+];
+
+// ── STATE ──
+let G={mode:'fresh',players:[],events:[],round:0,currentEvent:null,roundPIdx:0,playerChoices:{},timerInt:null,timerSec:0,musicOn:true,audioCtx:null,musicNodes:[],melodyTimer:null,masterGain:null};
+
+// ── AUDIO (Jazz-style looping music) ──
+// Jazz chord voicings: Cmaj7, Am7, Dm7, G7
+const JAZZ_CHORDS=[
+  [261.63,329.63,392.00,493.88],  // Cmaj7
+  [220.00,261.63,329.63,415.30],  // Am7
+  [293.66,349.23,440.00,523.25],  // Dm7 (up octave)
+  [196.00,246.94,293.66,392.00],  // G7
+];
+const JAZZ_MELODY=[
+  493.88,523.25,587.33,523.25,493.88,440.00,493.88,523.25,  // bar 1
+  440.00,493.88,440.00,392.00,349.23,329.63,349.23,392.00,  // bar 2
+  440.00,493.88,523.25,493.88,440.00,392.00,440.00,493.88,  // bar 3
+  392.00,349.23,329.63,293.66,261.63,293.66,329.63,349.23,  // bar 4
+];
+
+function initAudio(){
+  if(G.audioCtx) return;
+  try{
+    G.audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  }catch(e){ console.warn('Web Audio not available'); }
+}
+
+function playJazz(){
+  if(!G.audioCtx || !G.musicOn) return;
+  const ctx = G.audioCtx;
+  if(ctx.state === 'suspended') ctx.resume();
+
+  // Master gain — keep ref so we can kill it
+  const master = ctx.createGain();
+  master.gain.setValueAtTime(0, ctx.currentTime);
+  master.gain.linearRampToValueAtTime(0.22, ctx.currentTime + 1.2);
+  master.connect(ctx.destination);
+  G.masterGain = master;
+
+  const BPM = 72;
+  const beat = 60 / BPM;
+  const bar = beat * 4;
+  const totalBars = 4;
+  const loopLen = bar * totalBars;
+  const now = ctx.currentTime;
+
+  // ── Chord pads ──
+  JAZZ_CHORDS.forEach((chord, ci) => {
+    chord.forEach(freq => {
+      const osc = ctx.createOscillator();
+      const env = ctx.createGain();
+      const start = now + ci * bar;
+      osc.type = 'sine';
+      osc.frequency.value = freq * 0.5; // lower octave for warmth
+      env.gain.setValueAtTime(0, start);
+      env.gain.linearRampToValueAtTime(0.04, start + 0.15);
+      env.gain.setValueAtTime(0.06, start + bar - 0.1);
+      env.gain.linearRampToValueAtTime(0, start + bar);
+      osc.connect(env); env.connect(master);
+      osc.start(start); osc.stop(start + bar + 0.05);
+      G.musicNodes.push(osc, env);
+    });
+  });
+
+  // ── Walking bass ──
+  const bassNotes = [65.41,55.00,73.42,49.00]; // C2 A1 D2 G1
+  bassNotes.forEach((freq, bi) => {
+    [0,1,2,3].forEach(beat_i => {
+      const osc = ctx.createOscillator();
+      const env = ctx.createGain();
+      const start = now + bi * bar + beat_i * beat;
+      osc.type = 'triangle';
+      osc.frequency.value = freq * (beat_i % 2 === 0 ? 1 : 1.122); // slight walk
+      env.gain.setValueAtTime(0, start);
+      env.gain.linearRampToValueAtTime(0.10, start + 0.08);
+      env.gain.linearRampToValueAtTime(0.05, start + beat * 0.85);
+      env.gain.linearRampToValueAtTime(0, start + beat);
+      osc.connect(env); env.connect(master);
+      osc.start(start); osc.stop(start + beat + 0.05);
+      G.musicNodes.push(osc, env);
+    });
+  });
+
+  // ── Melody (soft) ──
+  const noteLen = beat / 2;
+  JAZZ_MELODY.forEach((freq, ni) => {
+    const osc = ctx.createOscillator();
+    const env = ctx.createGain();
+    const start = now + ni * noteLen;
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    env.gain.setValueAtTime(0, start);
+    env.gain.linearRampToValueAtTime(0.045, start + 0.06);
+    env.gain.linearRampToValueAtTime(0, start + noteLen * 0.85);
+    osc.connect(env); env.connect(master);
+    osc.start(start); osc.stop(start + noteLen + 0.05);
+    G.musicNodes.push(osc, env);
+  });
+
+  // ── Hi-hat (soft) ──
+  for(let i = 0; i < totalBars * 8; i++){
+    const bufLen = Math.floor(ctx.sampleRate * 0.04);
+    const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for(let j = 0; j < bufLen; j++) data[j] = (Math.random()*2-1) * (1 - j/bufLen);
+    const src = ctx.createBufferSource();
+    const filt = ctx.createBiquadFilter();
+    const env = ctx.createGain();
+    filt.type = 'highpass'; filt.frequency.value = 8000;
+    env.gain.value = 0.06;
+    src.buffer = buf;
+    src.connect(filt); filt.connect(env); env.connect(master);
+    src.start(now + i * (beat/2));
+    G.musicNodes.push(src, filt, env);
+  }
+
+  // Loop
+  G.melodyTimer = setTimeout(() => { if(G.musicOn) playJazz(); }, loopLen * 1000 - 100);
+}
+
+function stopAmbient(){
+  clearTimeout(G.melodyTimer);
+  G.melodyTimer = null;
+  // Fade out master gain quickly, then kill nodes
+  if(G.masterGain){
+    try{
+      G.masterGain.gain.cancelScheduledValues(G.audioCtx.currentTime);
+      G.masterGain.gain.setValueAtTime(G.masterGain.gain.value, G.audioCtx.currentTime);
+      G.masterGain.gain.linearRampToValueAtTime(0, G.audioCtx.currentTime + 0.2);
+    }catch(e){}
+  }
+  setTimeout(()=>{
+    G.musicNodes.forEach(n=>{ try{ n.stop&&n.stop(); n.disconnect&&n.disconnect(); }catch(e){} });
+    G.musicNodes = [];
+    if(G.masterGain){ try{ G.masterGain.disconnect(); }catch(e){} G.masterGain = null; }
+  }, 250);
+}
+
+function updateMusicBtn(){
+  const btn = document.getElementById('music-btn-game');
+  if(!btn) return;
+  if(G.musicOn){
+    btn.textContent = '♪';
+    btn.title = '關音樂';
+    btn.classList.add('on');
+  } else {
+    btn.textContent = '∅';
+    btn.title = '開音樂';
+    btn.classList.remove('on');
+  }
+}
+
+function toggleMusic(){
+  G.musicOn = !G.musicOn;
+  updateMusicBtn();
+  if(G.musicOn){
+    if(!G.audioCtx) initAudio();
+    if(G.audioCtx) playJazz();
+  } else {
+    stopAmbient();
+  }
+}
+
+// ── LOBBY ──
+function initLobby(){
+  document.getElementById('player-rows').innerHTML=PD.map((n,i)=>`
+    <div class="prow">
+      <div class="pdot" style="background:${PC[i]};box-shadow:0 0 6px ${PC[i]}55;"></div>
+      <input class="pinput" id="pn${i}" placeholder="${n}" value="${i<2?n:''}" maxlength="8" ${i>=2?'disabled':''}>
+      <div class="ptog ${i<2?'on':''}" id="pt${i}" onclick="togP(${i})">${i<2?'✓':'+'}</div>
+    </div>
+  `).join('');
+}
+function togP(i){
+  const t=document.getElementById('pt'+i),inp=document.getElementById('pn'+i);
+  const on=t.classList.toggle('on');
+  t.textContent=on?'✓':'+';
+  inp.disabled=!on;
+}
+function selMode(m){
+  G.mode=m;
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('mode-'+m).classList.add('sel');
+}
+function doStart(){
+  G.players=[];
+  for(let i=0;i<4;i++){
+    const t=document.getElementById('pt'+i);
+    if(t.classList.contains('on')){
+      const name=document.getElementById('pn'+i).value.trim()||PD[i];
+      const m=MODES[G.mode];
+      G.players.push({id:i,name,color:PC[i],bg:PB[i],border:PR[i],
+        cash:m.cash,income:m.income,expense:m.expense,assets:m.assets,happy:55,stress:20,history:[]});
+    }
+  }
+  if(G.players.length<2){alert('至少需要2位玩家！');return;}
+  G.events=[...EVENTS];G.round=0;
+  goScreen('game');
+
+  // Start music immediately when entering game
+  if(!G.musicOn){
+    G.musicOn = true;
+  }
+  updateMusicBtn();
+  initAudio();
+  setTimeout(()=>{
+    if(G.audioCtx){
+      playJazz();
+    }
+  },100);
+
+  updateStrip();
+  startRound();
+}
+
+// ── ROUND ──
+function startRound(){
+  if(G.round>=G.events.length){showLB();return;}
+  G.currentEvent=G.events[G.round];
+  G.playerChoices={};
+  G.roundPIdx=0;
+  document.getElementById('tb-q').textContent=G.round+1;
+  document.getElementById('tb-tot').textContent=G.events.length;
+  updateLifeStage();
+  document.getElementById('ev-card').style.display='block';
+  document.getElementById('cpb').style.display='flex';
+  document.getElementById('reveal-sec').classList.remove('show');
+  document.getElementById('lesson-card').style.display='none';
+  renderEvent();
+  updateStrip();
+  showTurnOv(G.players[0],true);
+}
+
+function renderEvent(){
+  const ev=G.currentEvent;
+  const tagEl=document.getElementById('ev-tag');
+  tagEl.textContent=TL[ev.type]||ev.type;
+  tagEl.setAttribute('style',TS[ev.type]||'');
+  document.getElementById('ev-qlab').textContent=`第 ${G.round+1} 題 / 共 ${G.events.length} 題`;
+  document.getElementById('ev-title').textContent=ev.title;
+  document.getElementById('ev-desc').textContent=ev.desc;
+  const tip=document.getElementById('ev-tip');
+  if(ev.tip){tip.style.display='block';tip.innerHTML='💡 '+ev.tip;}else tip.style.display='none';
+  document.getElementById('choices-grid').innerHTML=ev.choices.map((c,i)=>`
+    <div class="cc locked" id="cc${i}" onclick="playerChoose(${i})">
+      <div class="cc-letter">${LT[i]}</div>
+      <div class="cc-title">${c.text}</div>
+      <div class="cc-hint">${c.hint}</div>
+      <div class="cc-markers" id="ccm${i}"></div>
+    </div>
+  `).join('');
+  updateCPB();
+}
+
+// ── TURN OVERLAY ──
+function showTurnOv(player,isFirst){
+  const ov=document.getElementById('turn-ov');
+  const box=document.getElementById('turn-box');
+  box.style.cssText=`position:relative;z-index:1;border-radius:24px;border:3px solid ${player.color};max-width:400px;width:calc(100% - 32px);padding:40px 28px;text-align:center;background:var(--s1);`;
+  document.getElementById('turn-emoji').textContent=player.name[0];
+  document.getElementById('turn-emoji').style.cssText=`font-size:52px;margin-bottom:10px;animation:bob 1.2s ease-in-out infinite;width:72px;height:72px;border-radius:50%;background:${player.bg};border:3px solid ${player.color};display:inline-flex;align-items:center;justify-content:center;font-style:normal;`;
+  document.getElementById('turn-pname').textContent=player.name;
+  document.getElementById('turn-pname').style.color=player.color;
+  document.getElementById('turn-desc').textContent=isFirst?'請做出你的選擇！':'換到你了，請做出選擇！';
+  // Show who has chosen
+  const done=G.players.filter(p=>p.id in G.playerChoices);
+  const remaining=G.players.filter(p=>!(p.id in G.playerChoices));
+  let histHtml='';
+  if(done.length>0){
+    histHtml=`已選擇：${done.map(p=>`<span style="color:${p.color};font-weight:700;">${p.name} ✓</span>`).join(' ')}<br>`;
+  }
+  histHtml+=`還沒選：${remaining.map(p=>`<span style="color:${p.color};font-weight:700;">${p.name}</span>`).join(' ')}`;
+  document.getElementById('turn-history').innerHTML=histHtml+'<br><small>（其他玩家請把螢幕遮起來 👀）</small>';
+  const btn=document.getElementById('turn-btn');
+  btn.textContent=`${player.name}，我準備好了！`;
+  btn.style.cssText=`padding:13px 36px;border-radius:13px;font-size:15px;font-weight:900;border:none;cursor:pointer;font-family:'Noto Sans TC',sans-serif;transition:all .15s;background:${player.color};color:#0a0c10;`;
+  // Lock choices while overlay shows
+  document.querySelectorAll('.cc').forEach(c=>c.classList.add('locked'));
+  ov.classList.add('show');
+}
+
+function dismissTurnOv(){
+  document.getElementById('turn-ov').classList.remove('show');
+  // Unlock choices for current player
+  document.querySelectorAll('.cc').forEach(c=>c.classList.remove('locked'));
+  // Start timer on first player
+  if(G.roundPIdx===0) startTimer(30);
+  updateCPB();
+}
+
+function updateCPB(){
+  const p=G.players[G.roundPIdx];if(!p)return;
+  const cpb=document.getElementById('cpb');
+  cpb.style.cssText=`border-radius:13px;padding:11px 16px;display:flex;align-items:center;gap:11px;border:2px solid ${p.color};background:${p.bg};transition:all .3s;`;
+  const av=document.getElementById('cpb-av');
+  av.textContent=p.name[0];
+  av.style.cssText=`width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;flex-shrink:0;background:${p.color};color:#0a0c10;`;
+  document.getElementById('cpb-name').textContent=p.name;
+  document.getElementById('cpb-name').style.color=p.color;
+  const done=Object.keys(G.playerChoices).length;
+  document.getElementById('cpb-prog').textContent=`${done+1} / ${G.players.length} 位選擇中`;
+}
+
+// ── CHOICE ──
+function playerChoose(idx){
+  const p=G.players[G.roundPIdx];
+  if(!p||p.id in G.playerChoices)return;
+  // Lock all cards immediately
+  document.querySelectorAll('.cc').forEach(c=>c.classList.add('locked'));
+  G.playerChoices[p.id]=idx;
+  updateStrip();
+  G.roundPIdx++;
+  if(G.roundPIdx>=G.players.length){
+    clearInterval(G.timerInt);
+    setTimeout(revealResults,600);
+  }else{
+    setTimeout(()=>showTurnOv(G.players[G.roundPIdx],false),350);
+  }
+}
+
+// ── REVEAL ──
+function revealResults(){
+  clearInterval(G.timerInt);
+  document.getElementById('ev-card').style.display='none';
+  document.getElementById('cpb').style.display='none';
+  document.getElementById('reveal-sec').classList.add('show');
+  const ev=G.currentEvent;
+  const allSame=new Set(Object.values(G.playerChoices)).size===1;
+  document.getElementById('rev-emo').textContent=allSame?'🤝':'🔀';
+  document.getElementById('rev-title').textContent=allSame?'大家做了一樣的選擇！':'大家的選擇不同！';
+  document.getElementById('rev-sub').textContent=allSame?'相同決定，相同結果。下一題呢？':'不同決策！看看差距從這裡拉開。';
+  document.getElementById('outcomes-grid').innerHTML=G.players.map(p=>{
+    const ci=G.playerChoices[p.id]??0;
+    const ch=ev.choices[ci],r=ch.result,eff=r.eff||{};
+    if(eff.cash)p.cash+=eff.cash;
+    if(eff.income_delta)p.income+=eff.income_delta;
+    if(eff.expense_delta)p.expense+=eff.expense_delta;
+    if(eff.assets_delta)p.assets+=eff.assets_delta;
+    // 情緒系統：讓遊戲不只比錢，也比壓力與生活品質
+    const hasNeg=(r.chips||[]).some(c=>c.t==='neg');
+    const hasPos=(r.chips||[]).some(c=>c.t==='pos');
+    if(hasNeg){p.stress+=10;p.happy-=6;}
+    if(hasPos){p.stress-=4;p.happy+=5;}
+    if(eff.income_delta&&eff.income_delta>0){p.happy+=3;p.stress-=2;}
+    if(eff.cash&&eff.cash<0){p.stress+=4;}
+    p.happy=Math.max(0,Math.min(100,p.happy));
+    p.stress=Math.max(0,Math.min(100,p.stress));
+    p.cash+=(p.income-p.expense);
+    p.assets=Math.floor(p.assets*1.004);
+    p.cash=Math.max(p.cash,-500000);
+    p.history.push({round:G.round,choice:ci});
+    return `<div class="oc pop-in" style="background:${p.bg};border-color:${p.border};">
+      <div class="oc-hd">
+        <div class="oc-av" style="background:${p.color};color:#0a0c10;">${p.name[0]}</div>
+        <div><div class="oc-pname">${p.name}</div><div class="oc-choice">選了：${LT[ci]}. ${ch.text}</div></div>
+      </div>
+      <div class="oc-emo">${r.emoji}</div>
+      <div class="oc-rtitle">${r.title}</div>
+      <div class="oc-rdesc">${r.desc}</div>
+      <div class="chips">${r.chips.map(c=>`<div class="chip chip-${c.t}">${c.l}</div>`).join('')}</div>
+      <div class="oc-money">
+        <div class="oc-mrow"><span class="oc-mlbl">存款</span><span class="oc-mval" style="color:${p.cash>=0?'var(--green)':'var(--red)'}">${fmt(p.cash)}</span></div>
+        <div class="oc-mrow"><span class="oc-mlbl">投資資產</span><span class="oc-mval" style="color:var(--gold)">${fmt(p.assets)}</span></div>
+      </div>
+      <div class="vibe-row">
+        <div class="vibe-pill"><div class="vibe-lbl">快樂值</div><div class="vibe-val" style="color:var(--green)">${p.happy}/100</div></div>
+        <div class="vibe-pill"><div class="vibe-lbl">壓力值</div><div class="vibe-val" style="color:${p.stress>70?'var(--red)':'var(--gold)'}">${p.stress}/100</div></div>
+      </div>
+    </div>`;
+  }).join('');
+  if(ev.lesson){document.getElementById('lesson-card').style.display='block';document.getElementById('lesson-txt').innerHTML=ev.lesson;}
+  document.getElementById('btn-next').textContent=G.round+1>=G.events.length?'查看最終成績 🏁':'下一題 →';
+  updateStrip();
+  document.getElementById('game').querySelector('.game-main').scrollTo({top:0,behavior:'smooth'});
+}
+
+function nextRound(){
+  G.round++;
+  if(G.round>=G.events.length){showLB();return;}
+  startRound();
+}
+
+// ── SCORE STRIP ──
+function updateStrip(){
+  document.getElementById('score-inner').innerHTML=G.players.map(p=>{
+    const chosen=p.id in G.playerChoices;
+    const isCur=G.players[G.roundPIdx]?.id===p.id;
+    return `<div class="sc-pl${isCur?' ':''}">
+      <div class="sc-av" style="background:${p.bg};color:${p.color};border-color:${isCur?p.color:'transparent'};">${p.name[0]}</div>
+      <div class="sc-info">
+        <div class="sc-name">${p.name}</div>
+        <div class="sc-nums">${fmt(p.cash)} | ▲${fmt(p.assets)}</div>
+      </div>
+      <div class="sc-tick${chosen?' done':''}"></div>
+    </div>`;
+  }).join('');
+}
+
+// ── TIMER ──
+function startTimer(sec){
+  G.timerSec=sec;
+  const fill=document.getElementById('tr-fill');
+  const num=document.getElementById('timer-num');
+  const circ=94.2;
+  clearInterval(G.timerInt);
+  G.timerInt=setInterval(()=>{
+    G.timerSec--;
+    num.textContent=Math.max(0,G.timerSec);
+    const pct=G.timerSec/sec;
+    fill.style.strokeDashoffset=circ*(1-pct);
+    fill.style.stroke=G.timerSec>10?'var(--gold)':'var(--red)';
+    if(G.timerSec<=0){
+      clearInterval(G.timerInt);
+      G.players.forEach(p=>{if(!(p.id in G.playerChoices))G.playerChoices[p.id]=0;});
+      document.getElementById('turn-ov').classList.remove('show');
+      revealResults();
+    }
+  },1000);
+}
+
+// ── LEADERBOARD ──
+function showLB(){
+  stopAmbient();
+
+  const calcScore = (p)=>{
+    const wealth = p.cash + p.assets;
+    const happiness = p.happiness ?? 70;
+    const stress = p.stress ?? 30;
+    return Math.round(wealth + happiness*1200 - stress*900);
+  };
+
+  const sorted=[...G.players].sort((a,b)=>calcScore(b)-calcScore(a));
+  const maxScore=Math.max(...sorted.map(calcScore),1);
+  const medals=['1','2','3','4'];
+
+  // Kahoot-style bar graph
+  document.getElementById('bar-list').innerHTML=sorted.map((p,i)=>{
+    const total=p.cash+p.assets;
+    const score=calcScore(p);
+    const pct=Math.max(8,Math.round((score/maxScore)*100));
+    const happy=p.happiness ?? 70;
+    const stress=p.stress ?? 30;
+    return `<div class="bar-row">
+      <div class="bar-name">
+        <div class="bar-medal">${medals[i]||i+1}</div>
+        <div class="bar-player" style="color:${p.color}">${p.name}</div>
+      </div>
+      <div>
+        <div class="bar-track">
+          <div class="bar-fill" style="background:linear-gradient(90deg,${p.color},rgba(245,200,66,.85));width:${pct}%"></div>
+        </div>
+        <div class="life-stats">
+          <div class="life-pill"><b>${fmt(total)}</b><span>總資產</span></div>
+          <div class="life-pill"><b>${happy}</b><span>快樂值</span></div>
+          <div class="life-pill"><b>${stress}</b><span>壓力值</span></div>
+        </div>
+      </div>
+      <div class="bar-score">
+        ${score.toLocaleString()}
+        <div class="bar-detail">人生總分</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Ranking cards
+  document.getElementById('rank-list').innerHTML=sorted.map((p,i)=>{
+    const total=p.cash+p.assets,net=p.income-p.expense;
+    const title=i===0?'人生平衡王':i===1?'穩健生存者':i===2?'還有救玩家':'下次再努力';
+    return `<div class="rank-row">
+      <div class="rank-n">${i+1}</div>
+      <div class="rank-av" style="background:${p.bg};color:${p.color};border:2px solid ${p.border};">${p.name[0]}</div>
+      <div class="rank-info">
+        <div class="rank-name">${p.name} · ${title}</div>
+        <div class="rank-sub">${MODES[G.mode].name} · 月結餘 <span style="color:${net>=0?'var(--green)':'var(--red)'}">${net>=0?'+':''}${fmt(net)}</span></div>
+      </div>
+      <div class="rank-nums">
+        <div class="rni"><div class="rni-val" style="color:var(--green)">${fmt(p.cash)}</div><div class="rni-lbl">存款</div></div>
+        <div class="rni"><div class="rni-val" style="color:var(--gold)">${fmt(p.assets)}</div><div class="rni-lbl">投資</div></div>
+        <div class="rni"><div class="rni-val" style="color:var(--blue)">${fmt(total)}</div><div class="rni-lbl">總資產</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Pretty key takeaway cards
+  const takeaways=[
+    {t:'先存後花',d:'發薪日先把儲蓄轉走，剩下的才是可花預算。'},
+    {t:'備用金保命',d:'準備3–6個月生活費，意外來時不用靠借錢。'},
+    {t:'投資要分散',d:'ETF、定期定額、長期持有，比追飆股更適合新手。'},
+    {t:'保證獲利要懷疑',d:'看到高報酬、保證賺、催你快決定，先查證再說。'},
+    {t:'薪資也是理財',d:'談薪水、跳槽、提升能力，都是影響財富的重要選擇。'},
+    {t:'人生不是只有錢',d:'壓力、快樂、健康和關係，也會影響你的財務選擇。'}
+  ];
+  document.getElementById('lb-lessons').innerHTML=takeaways.map((x,i)=>`
+    <div class="lesson-mini">
+      <div class="lesson-mini-top">
+        <div class="lesson-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="lesson-kind">TAKEAWAY</div>
+      </div>
+      <h4>${x.t}</h4>
+      <p>${x.d}</p>
+    </div>
+  `).join('');
+
+  goScreen('leaderboard');
+
+  // Trigger graph animation after screen paint
+  setTimeout(()=>{
+    document.querySelectorAll('.bar-fill').forEach(el=>{
+      const w=el.style.width;
+      el.style.width='0%';
+      requestAnimationFrame(()=>{ el.style.width=w; });
+    });
+  },80);
+}
+
+ // ── UTILS ──
+
+function updateLifeStage(){
+  const stages=[
+    {age:22,emoji:'◇',title:'剛畢業，薪水第一次進帳',note:'你以為自由了，其實帳單也開始自由了。'},
+    {age:24,emoji:'◌',title:'朋友約聚餐，手搖飲也在招手',note:'小錢不可怕，可怕的是每天都小錢。'},
+    {age:26,emoji:'▣',title:'開始比較薪水與職涯選擇',note:'這一階段的每次談判，都會影響未來十年。'},
+    {age:28,emoji:'△',title:'投資、保險、詐騙一起出現',note:'你不是在選答案，你是在保護未來的自己。'},
+    {age:30,emoji:'⌂',title:'三十歲焦慮正式登場',note:'買房、結婚、退休、父母健康，人生開始變多線任務。'}
+  ];
+  const idx=Math.min(stages.length-1,Math.floor(G.round/2));
+  const st=stages[idx];
+  const pct=Math.round((G.round/Math.max(1,G.events.length-1))*100);
+  const e=id=>document.getElementById(id);
+  if(!e('stage-title')) return;
+  e('stage-emoji').textContent=st.emoji;
+  e('stage-kicker').textContent=`AGE ${st.age}`;
+  e('stage-title').textContent=st.title;
+  e('stage-note').textContent=st.note;
+  e('stage-bar').style.width=pct+'%';
+}
+
+function goHome(){
+  // 無彈窗版：點了就真的回主大廳，並完整重置遊戲狀態
+  document.getElementById('turn-ov').classList.remove('show');
+  clearInterval(G.timerInt);
+  G.musicOn=false;
+  stopAmbient();
+  G.players=[];
+  G.events=[];
+  G.round=0;
+  G.currentEvent=null;
+  G.roundPIdx=0;
+  G.playerChoices={};
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('lobby').classList.add('active');
+  document.getElementById('lobby').scrollTop=0;
+  window.scrollTo(0,0);
+  initLobby();
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('mode-'+G.mode).classList.add('sel');
+  updateMusicBtn();
+}
+
+function fmt(n){
+  if(Math.abs(n)>=10000)return (n/10000).toFixed(1)+'萬';
+  return n.toLocaleString()+'元';
+}
+function goScreen(id){
+  clearInterval(G.timerInt);
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function confirmHome(){ goHome(); }
+
+// Auto start cafe jazz on load
+window.addEventListener('load',()=>{
+  G.musicOn = true;
+  updateMusicBtn();
+  setTimeout(()=>{
+    initAudio();
+    if(G.audioCtx){
+      playJazz();
+    }
+  },500);
+});
+
+// ── INIT ──
+initLobby();
+// Set initial music button state after DOM ready
+setTimeout(updateMusicBtn,0);
+</script>
+</body>
+</html>
